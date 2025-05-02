@@ -1,0 +1,46 @@
+/* Change name of instrument and input parameters with default values */
+DEFINE INSTRUMENT Prueba(P=3, TL=0.2, L1=0.60)
+
+/* The DECLARE section allows us to declare variables or  small      */
+/* functions in C syntax. These may be used in the whole instrument. */
+DECLARE
+%{
+
+%}
+/* The INITIALIZE section is executed when the simulation starts     */
+/* (C code). You may use them as component parameter values.         */
+INITIALIZE
+%{
+%}
+
+/* Here comes the TRACE section, where the actual      */
+/* instrument is defined as a sequence of components.  */
+TRACE
+        
+COMPONENT Origin = Progress_bar()
+  AT (0,0,0) ABSOLUTE
+
+
+COMPONENT s2p = Source_pt(
+    spectrum_file = "Spectrum30.txt", focus_xw = 0.01408, focus_yh = 0.01408, flux = 1E11, dist = 1.8, E0 = 1)
+WHEN P==3  AT (0, 0, 0) RELATIVE Origin
+
+
+COMPONENT sample = Absorption_and_Snells_A(
+        material_datafile_i="APYodo3.txt", 
+	material_datafile_o="APMMA3.txt", 
+	radius_o=0.00097, 
+	yheight_o=TL, 
+	radius_i=0.00046, 
+	yheight_i=TL,
+	rho_i=0.9,
+	rho_o=1.33)
+AT(0,0,L1) RELATIVE Origin
+ROTATED (0, 0, 90) RELATIVE Origin
+
+
+COMPONENT psd= PSD_monitor(
+   restore_xray=0, xwidth=0.01408, yheight=0.01408, nx = 256, ny = 256, filename="psdmon.dat")
+AT(0,0,1.8) RELATIVE Origin
+END
+
